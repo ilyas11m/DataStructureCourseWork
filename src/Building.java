@@ -1,7 +1,8 @@
+/**
+ * Реализация класса "Здание" со свойствами: "Номер".
+ */
 public class Building {
-    /**
-     * Реализация класса "Здание" со свойствами: "Номер".
-     */
+
     private Building next;
     private int buildingNumber;
     private Auditorium head;

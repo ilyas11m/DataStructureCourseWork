@@ -1,9 +1,10 @@
+/**
+ * Реализация класса "Институт" со свойствами: "Наименование".
+ */
 import java.util.Objects;
 
 public class Institute {
-    /**
-     * Реализация класса "Институт" со свойствами: "Наименование".
-     */
+
     private String instituteName;
     private Building head;
     private Institute next;

@@ -1,10 +1,11 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class MainFrame {
@@ -167,21 +168,35 @@ public class MainFrame {
                 Building currentBuilding = institute.getHead();
                 StringBuilder stringBuilder = new StringBuilder();
                 boolean found = false;
+
                 while (currentBuilding != null) {
                     if (currentBuilding.getBuildingNumber() == findingBuildingNumber) {
-                        stringBuilder.append("Найдено здание с номером: ").append(findingBuildingNumber).append(currentBuilding.getHead()).append('\n');
+                        stringBuilder.append("Найдено здание с номером: ").append(findingBuildingNumber).append("\n");
+
+                        Auditorium currentAuditorium = currentBuilding.getHead();
+                        if (currentAuditorium == null) {
+                            stringBuilder.append("В этом здании нет аудиторий");
+                        }
+                        else {
+                            while (currentAuditorium != null) {
+                                stringBuilder.append(" В этом здании есть аудитория: ").
+                                        append(currentAuditorium.getAuditoriumNumber()).
+                                        append(" Вместимостью: ").append(currentAuditorium.getAuditoriumCapacity()).append('\n');
+                                currentAuditorium = currentAuditorium.getNext();
+                            }
+                        }
                         found = true;
-                        currentBuilding = currentBuilding.getNext();
                     }
+                    currentBuilding = currentBuilding.getNext();
                 }
                 if (found) {
                     JOptionPane.showMessageDialog(null, stringBuilder);
                 } else {
-                    JOptionPane.showMessageDialog(null, "Error");
+                    JOptionPane.showMessageDialog(null, "Building was not found");
                 }
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(null, ex.getMessage());
-                System.out.println("ERROR");
+                System.out.println("Error");
             }
         });
         buttonPanel.add(findBuildingsButton);
@@ -249,9 +264,10 @@ public class MainFrame {
         });
         buttonPanel.add(saveDataToFileButton);
 
+        //КНОПКА ЗАГРУЗКИ ДАННЫХ ИЗ ФАЙЛА
         JButton loadDataFromFileButton = new JButton("Загрузить данные из файла");
         loadDataFromFileButton.addActionListener(_ -> {
-
+            loadDataFromFile(table);
         });
         buttonPanel.add(loadDataFromFileButton);
 
@@ -263,6 +279,13 @@ public class MainFrame {
             updateTable(table);
         });
         buttonPanel.add(deleteButton);
+    }
+
+    private void setData(Object[][] newData, JTable table) {
+        if (newData != null) {
+            this.data = newData;
+            updateTable(table);
+        }
     }
 
     private Object[][] getData() {
@@ -323,17 +346,40 @@ public class MainFrame {
         model.setDataVector(data, new String[]{"№", "Институт", "Номер здания", "Номер аудитории", "Число мест"});
     }
 
+    private void loadDataFromFile(JTable table) {
+        JFileChooser fileChooser = new JFileChooser();
+        int result = fileChooser.showOpenDialog(null);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                String line;
+                List<Object[]> dataList = new ArrayList<>();
+                while ((line = reader.readLine()) != null) {
+                    String[] parts = line.split(";");
+                    if (parts.length == 5) {
+                        Object[] row = new Object[5];
+                        for (int i = 0; i < parts.length; i++) {
+                            row[i] = parts[i];
+                        }
+                        dataList.add(row);
+                    }
+                }
+                Object[][] dataFromFile = dataList.toArray(new Object[0][5]);
+                setData(dataFromFile, table);
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(null, "Ошибка при чтении файла: " + e.getMessage());
+            }
+        }
+    }
+
     private void saveDataToFile() {
         LocalDateTime current = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd");
         String fileName = "output-file" + formatter.format(current) + ".txt";
         try (FileWriter writer = new FileWriter(fileName)) {
-            String[] headers = {"Институт", "Номер здания", "Номер аудитории", "Число мест"};
-            writer.write(String.join("|", headers) + "\n");
-
             for (Object[] row : data) {
                 StringBuilder line = new StringBuilder();
-                for (int j = 1; j < row.length; j++) {
+                for (int j = 0; j < row.length; j++) {
                     line.append(row[j] != null ? row[j].toString() : "").append(";");
                 }
                 if (line.length() > 0) {

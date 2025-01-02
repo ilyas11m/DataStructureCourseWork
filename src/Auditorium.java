@@ -1,7 +1,8 @@
+/**
+ * Реализация класса "Аудитория" со свойствами: "Номер" и "Вместимость".
+ */
 public class Auditorium {
-    /**
-     * Реализация класса "Аудитория" со свойствами: "Номер" и "Вместимость".
-     */
+
     private int auditoriumNumber;
     private int capacity;
     private Auditorium next;
@@ -49,7 +50,7 @@ public class Auditorium {
 
     @Override
     public String toString() {
-        return "номер = " + auditoriumNumber +
+        return " Аудитория = " + auditoriumNumber +
                 ", вместимость = " + capacity + ".";
     }
 }

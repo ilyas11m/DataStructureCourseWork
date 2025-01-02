@@ -1,11 +1,14 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 
 public class MainFrame {
     Institute institute;
-
     Object[][] data = new Object[0][5];
 
     public MainFrame() {
@@ -144,39 +147,41 @@ public class MainFrame {
         });
         buttonPanel.add(deleteAuditoriumButton);
 
+
         //КНОПКА ПОИСКА ЗДАНИЯ
         JButton findBuildingsButton = new JButton("Найти здание");
         findBuildingsButton.addActionListener(_ -> {
             try {
-
                 String buildingNumberInput = JOptionPane.showInputDialog(null, "Введите номер здания");
                 if (buildingNumberInput == null || buildingNumberInput.isEmpty()) {
                     JOptionPane.showMessageDialog(null, "Номер здания не может быть пустым.");
                     return;
                 }
 
+                if (institute.getHead() == null) {
+                    JOptionPane.showMessageDialog(null, "Зданий нет!");
+                    return;
+                }
+
                 int findingBuildingNumber = Integer.parseInt(buildingNumberInput);
-                Building differentBuilding = institute.getHead();
+                Building currentBuilding = institute.getHead();
                 StringBuilder stringBuilder = new StringBuilder();
                 boolean found = false;
-                while (differentBuilding != null) {
-
-                    if (findingBuildingNumber == differentBuilding.getBuildingNumber()) {
-
-                        Building targetBuilding = institute.find(findingBuildingNumber);
-                        if (targetBuilding != null) {
-                            stringBuilder.append("Найдено здание с номером: ").append(findingBuildingNumber).append("\n");
-                            found = true;
-                        }
-
-                        differentBuilding = differentBuilding.getNext();
+                while (currentBuilding != null) {
+                    if (currentBuilding.getBuildingNumber() == findingBuildingNumber) {
+                        stringBuilder.append("Найдено здание с номером: ").append(findingBuildingNumber).append(currentBuilding.getHead()).append('\n');
+                        found = true;
+                        currentBuilding = currentBuilding.getNext();
                     }
                 }
                 if (found) {
                     JOptionPane.showMessageDialog(null, stringBuilder);
+                } else {
+                    JOptionPane.showMessageDialog(null, "Error");
                 }
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(null, ex.getMessage());
+                System.out.println("ERROR");
             }
         });
         buttonPanel.add(findBuildingsButton);
@@ -237,6 +242,19 @@ public class MainFrame {
         });
         buttonPanel.add(changeInstituteName);
 
+        //КНОПКА СОХРАНЕНИЯ В ФАЙЛ
+        JButton saveDataToFileButton = new JButton("Сохранить в файл");
+        saveDataToFileButton.addActionListener(_ -> {
+            saveDataToFile();
+        });
+        buttonPanel.add(saveDataToFileButton);
+
+        JButton loadDataFromFileButton = new JButton("Загрузить данные из файла");
+        loadDataFromFileButton.addActionListener(_ -> {
+
+        });
+        buttonPanel.add(loadDataFromFileButton);
+
         //КНОПКА ОЧИСТКИ
         JButton deleteButton = new JButton("Очистка");
         deleteButton.addActionListener(_ -> {
@@ -268,8 +286,8 @@ public class MainFrame {
         }
 
         Object[][] data = new Object[rows][5];
-        int row = 0;
 
+        int row = 0;
         currentInstitute = institute;
         while (currentInstitute != null) {
             Building currentBuilding = currentInstitute.getHead();
@@ -305,14 +323,28 @@ public class MainFrame {
         model.setDataVector(data, new String[]{"№", "Институт", "Номер здания", "Номер аудитории", "Число мест"});
     }
 
-    private void setData(Object[][] data, int row) {
-        if (data == null) {
-            return;
-        }
-        String instituteName = "None";
-        institute.destruct();
-        for (int i = 0; i < row; i++) {
-            instituteName = (String) data[i][1];
+    private void saveDataToFile() {
+        LocalDateTime current = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM-dd");
+        String fileName = "output-file" + formatter.format(current) + ".txt";
+        try (FileWriter writer = new FileWriter(fileName)) {
+            String[] headers = {"Институт", "Номер здания", "Номер аудитории", "Число мест"};
+            writer.write(String.join("|", headers) + "\n");
+
+            for (Object[] row : data) {
+                StringBuilder line = new StringBuilder();
+                for (int j = 1; j < row.length; j++) {
+                    line.append(row[j] != null ? row[j].toString() : "").append(";");
+                }
+                if (line.length() > 0) {
+                    line.deleteCharAt(line.length() - 1);
+                }
+                writer.write(line + "\n");
+            }
+            JOptionPane.showMessageDialog(null, "Данные успешно сохранены в файл: " + fileName);
+
+        } catch (IOException exception) {
+            JOptionPane.showMessageDialog(null, "Ошибка при сохранении файла: " + exception.getMessage());
         }
     }
 

@@ -3,9 +3,9 @@
  */
 public class Auditorium {
 
+    private Auditorium next;
     private int auditoriumNumber;
     private int capacity;
-    private Auditorium next;
 
     public Auditorium(int number, int capacity) {
         this.capacity = capacity;
@@ -38,6 +38,11 @@ public class Auditorium {
         return next;
     }
 
+    @Override
+    public String toString() {
+        return "Аудитория с номером: " + auditoriumNumber + " вместимостью = " + capacity;
+    }
+
     public void setNext(Auditorium next) {
         this.next = next;
     }
@@ -46,11 +51,5 @@ public class Auditorium {
         this.auditoriumNumber = -1;
         this.capacity = -1;
         this.next = null;
-    }
-
-    @Override
-    public String toString() {
-        return " Аудитория = " + auditoriumNumber +
-                ", вместимость = " + capacity + ".";
     }
 }

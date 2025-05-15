@@ -7,12 +7,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-
-public class MainFrame {
+public class FrameApp {
     Institute institute;
     Object[][] data = new Object[0][5];
 
-    public MainFrame() {
+    public FrameApp() {
         institute = new Institute("ИКТЗИ");
 
         data = getData();
@@ -147,7 +146,6 @@ public class MainFrame {
             }
         });
         buttonPanel.add(deleteAuditoriumButton);
-
 
         //КНОПКА ПОИСКА ЗДАНИЯ
         JButton findBuildingsButton = new JButton("Найти здание");
@@ -395,7 +393,7 @@ public class MainFrame {
     }
 
     public static void main(String[] args) {
-        new MainFrame();
+        new FrameApp();
     }
 }
 

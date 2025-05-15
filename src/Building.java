@@ -84,6 +84,11 @@ public class Building {
         }
     }
 
+    @Override
+    public String toString() {
+        return "№" + buildingNumber;
+    }
+
     public Auditorium find(int auditoriumNumber, int capacity) {
         Auditorium current = head;
         while (current != null) {
@@ -104,10 +109,6 @@ public class Building {
             current = current.getNext();
         }
 
-        if (current == null) {
-            throw new IllegalArgumentException("Auditorium not found!");
-        }
-
         if (prev == null) {
             head = current.getNext();
             if (head == null) {
@@ -123,12 +124,11 @@ public class Building {
     }
 
     public void destruct() {
-        if (head != null) {
+        while (head != null) {
             Auditorium temp = head;
             head = head.getNext();
             temp.destruct();
         }
-        head = null;
         tail = null;
         buildingNumber = -1;
     }
